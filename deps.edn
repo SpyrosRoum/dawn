@@ -1,9 +1,22 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        http-kit/http-kit {:mvn/version "2.8.0"}
+ :deps {org.clojure/clojure {:mvn/version "1.12.0"}
         com.taoensso/telemere {:mvn/version "1.0.0-RC5"}
+        com.taoensso/telemere-slf4j {:mvn/version "1.0.0-RC5"}
+
+        http-kit/http-kit {:mvn/version "2.8.0"}
         ring/ring {:mvn/version "1.13.0"}
-        ring/ring-defaults {:mvn/version "0.6.0"}}
+        ring/ring-defaults {:mvn/version "0.6.0"}
+        manifold/manifold {:mvn/version "0.4.3"}
+
+        mount/mount {:mvn/version "0.1.21"}
+        com.xtdb/xtdb-api {:mvn/version "2.0.0-beta6"}
+        com.xtdb/xtdb-http-client-jvm {:mvn/version "2.0.0-beta6"}
+
+        org.springframework.security/spring-security-crypto {:mvn/version "6.4.4"}
+        ;; bouncy castle is needed for spring-security's argon2 impl
+        org.bouncycastle/bcpkix-jdk18on {:mvn/version "1.80"}
+        ;; commons-logging is also required by spring-security
+        commons-logging/commons-logging {:mvn/version "1.3.5"}}
  :aliases
  {:run-m {:main-opts ["-m" "dawn.dawn"]}
   :run-x {:ns-default dawn.dawn

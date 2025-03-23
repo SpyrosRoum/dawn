@@ -73,6 +73,44 @@
 (defn get-player-by-client-id [client-id]
   (get @players client-id))
 
+(defn handle-cmd
+  "Handle input for a connected player.
+  This is the primary orchestrator when a command comes,
+  and it's responsible for figuring out who can execute this command.
+
+  For example, rooms have the highest priority for commands,
+  then come the items in the room, etc.
+
+  A full explanation of the priority for commands can be found here"
+  ;; TODO: Add doc with command order.
+  [player cmd])
+
+
+;;; After this point it's experimentation about how to handle commands
+
+(defmulti run-cmd (fn [obj-type cmd player] [obj-type (:cmd cmd)]))
+
+(defmethod run-cmd :default
+  ([obj-id cmd player]
+   (throw (ex-info "Unhandled command" {:cmd (:cmd cmd)
+                                        :obj-id obj-id
+                                        :player (:xt/id player)}))))
+
+(defmethod run-cmd [::player "say"]
+  ([_ cmd player]
+   (tel/log! [(:display-name player) "tried to" (:cmd cmd)])))
+
+(defmethod run-cmd [::player "jump"]
+  ([_ cmd player]
+   (tel/log! [(:display-name player) "tried to" "hardcoded jump"])))
+
+(defmethod run-cmd ::intro-room
+  ([_ cmd player]
+   (tel/log! [(:display-name player) "tried to" (:cmd cmd) "FOR ROOM"])))
+
 (comment
+  (run-cmd ::player {:cmd "say"} {:display-name "Enip"})
+
+  (ns-unmap *ns* 'run-cmd)
   (reset! players {})
   ,)

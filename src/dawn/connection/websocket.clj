@@ -1,9 +1,10 @@
 (ns dawn.connection.websocket
   (:require
    [clojure.string :as str]
-   [dawn.cmd-parser :refer [str->cmd]]
+   [dawn.commands.cmd-set :refer [run-cmd]]
    [dawn.messages :refer [messages]]
    [dawn.player :as player]
+   [dawn.session :as sess]
    [manifold.stream :as s]
    [org.httpkit.server :as kit]
    [ring.middleware.defaults :refer [api-defaults wrap-defaults]]
@@ -14,22 +15,23 @@
   "Try to log in/sign up the user and associate the client id with a user id.
   If it fails close the connection."
   [chn client-id]
-  (tel/log! :debug ["Opened websocket with client id" client-id])
-  (kit/send! chn (:welcome messages)))
+  (tel/log! :debug ["Opened websocket with client id:" client-id])
+  (let [session (sess/mk-empty-session (fn [m] (kit/send! chn m) nil))]
+    (sess/add-session client-id session)
+    (sess/on-new-session session)))
 
-(defn on-close [chn status-code client-id] (player/on-player-disconnect client-id))
+(defn on-close [chn status-code client-id] (sess/on-session-disconnect client-id))
 
 (defn on-receive [chn msg client-id]
-  (if-let [client (player/get-player-by-client-id client-id)]
-    (throw (ex-info "Not implemented" {}))
-    (player/on-player-connect (str->cmd msg) client-id #((kit/send! chn %) nil))))
+  (when-let [s (sess/get-session-by-client-id client-id)]
+    (let [new-sess (run-cmd msg s)]
+      (sess/add-session client-id new-sess))))
 
 (defn handler [ring-req]
   (if-not (:websocket? ring-req)
     {:status 200 :headers {"content-type" "text/html"} :body "Connect WebSockets to this URL, passing a client uuid."}
     (let [client-id (random-uuid)]
       (tel/event! ::websocket-connected {:let [client-id client-id]
-                                         :data {:client-id client-id}
                                          :msg ["Connected client" client-id]})
       (kit/as-channel ring-req
         {:on-open    (fn [ch] (on-open ch client-id))

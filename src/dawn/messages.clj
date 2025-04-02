@@ -11,4 +11,6 @@
                                    "|connect <username> <password>| to continue your story or"
                                    "|create <username> <password>| to start a new one."])
    :username-taken "Sorry, seems like that name is taken already."
-   :bad-username-pass "Sorry, wrong username or password."})
+   :bad-username-pass "Sorry, wrong username or password."
+   :unknown-cmd "I don't know what that means"
+   :generic-error "Oops, something went wrong. Sorry."})

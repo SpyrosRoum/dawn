@@ -15,8 +15,9 @@
 
 (defn cmd-player-look
   {:cmd-name "look me"}
-  [p]
-  ((:msg p) "Look at player called"))
+  [session args]
+  ((:msg session) "I'm pretty, ain't I?")
+  session)
 
 (defrecord Player [display-name]
   CmdSet

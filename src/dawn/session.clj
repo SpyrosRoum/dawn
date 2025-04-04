@@ -10,15 +10,6 @@
 ;; client-id -> Session
 (def sessions (atom {}))
 
-(comment
-  @sessions
-
-  (first (keys @sessions))
-  (let [sess (get @sessions (first (keys @sessions)))]
-    (:cmds sess)
-    ;; (cmd/get-commands (:char sess)))
-  ,)
-
 (defn char-connected-cmds [cmds]
   (-> cmds
       (cmd/remove-cmd "create")
@@ -43,11 +34,11 @@
         ((:msg session) (format "Welcome back, %s" (:display-name character)))
         (-> session
           (assoc :char character)
-          (update :cmds char-connected-cmds))))
-          ;; (update :cmds cmd/merge-sets (cmd/get-commands character))))
-      (throw (ex-info
-               "This character name is already taken."
-               {:message (:bad-username-pass messages)})))))
+          (update :cmds char-connected-cmds)
+          (update :cmds cmd/merge-sets (cmd/get-commands character))))
+        (throw (ex-info
+                 "Bad username or password"
+                 {:message (:bad-username-pass messages)})))))
 
 (defn cmd-create-char
   {:cmd-name "create"
@@ -61,7 +52,8 @@
         ((:msg session) (format "Welcome aboard, %s" (:display-name character)))
         (-> session
           (assoc :char character)
-          (update :cmds char-connected-cmds))) ; TODO: Add character commands
+          (update :cmds char-connected-cmds)
+          (update :cmds cmd/merge-sets (cmd/get-commands character))))
       (throw (ex-info
                "This character name is already taken."
                {:message (:username-taken messages)})))))

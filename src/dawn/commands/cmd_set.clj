@@ -15,7 +15,7 @@
   [cmds1 cmds2]
   (merge cmds1 cmds2))
 
-(defmacro cmd [c] `[(meta (var ~c)) ~c])
+(defmacro cmd [c] `[(meta (var ~c)) (var ~c)])
 
 (defn add-cmd [cmd-set [cmd-meta cmd]]
   (let [cmd-name (:cmd-name cmd-meta)
@@ -42,7 +42,7 @@
   (if-let [cmd (get-cmd msg (:cmds session))]
     (let [raw-args (str/replace-first msg (:cmd-name cmd) "")
           parse (get cmd :args-parser str->args)
-          validate (get cmd :args-validate #())]
+          validate (or (:args-validate cmd) (fn [args] args))]
       (try
         (-> raw-args
             parse
